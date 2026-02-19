@@ -13,7 +13,8 @@ import {
     login,
     register,
     logout,
-    getMe
+    getMe,
+    getTrending
 } from './services/api';
 import './App.css';
 
@@ -26,10 +27,15 @@ function App() {
     const [authPage, setAuthPage] = useState('login');
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
     const [resetToken, setResetToken] = useState(null);
+    const [trendingMovies, setTrendingMovies] = useState([]);
+    const [trendingPage, setTrendingPage] = useState(1);
+    const [trendingTotalPages, setTrendingTotalPages] = useState(1);
+
 
     useEffect(() => {
         handleUrlParams();
         checkAuth();
+        fetchTrending();
     }, []);
 
     const handleUrlParams = () => {
@@ -73,6 +79,21 @@ function App() {
             setUser(null);
         } finally {
             setIsCheckingAuth(false);
+        }
+    };
+
+    const fetchTrending = async (page = 1) => {
+        try {
+            const data = await getTrending(page);
+            if (page === 1) {
+                setTrendingMovies(data.movies);
+            } else {
+                setTrendingMovies(prev => [...prev, ...data.movies]);
+            }
+            setTrendingPage(data.page);
+            setTrendingTotalPages(data.totalPages);
+        } catch (err) {
+            console.error('Failed to fetch trending:', err);
         }
     };
 
@@ -181,12 +202,51 @@ function App() {
             />
             <main className="main-content">
                 {movies.length === 0 && !isLoading && !error && (
-                    <div className="welcome-message">
-                        <h2>{user ? 'Welcome, ' + user.name + '!' : 'Welcome to MovisionAI'}</h2>
-                        <p>Tell me what kind of movies you enjoy, and I will recommend
-                            some great picks for you!</p>
-                        <p className="welcome-hint">Try something like: "I love sci-fi movies
-                            with mind-bending plots" or "Suggest some feel-good comedies"</p>
+                    <div className="welcome-section">
+                        <div className="welcome-message">
+                            <h2>{user ? 'Welcome, ' + user.name + '!' : 'Welcome to MovisionAI'}</h2>
+                            <p>Tell me what kind of movies you enjoy, and I will recommend
+                                some great picks for you!</p>
+                            <p className="welcome-hint">Try something like: "I love sci-fi movies
+                                with mind-bending plots" or "Suggest some feel-good comedies"</p>
+                        </div>
+
+                        {trendingMovies.length > 0 && (
+                            <div className="trending-section">
+                                <h2 className="trending-title">🔥 Trending This Week</h2>
+                                <div className="trending-grid">
+                                    {trendingMovies.map((movie) => (
+                                        <div key={movie.tmdbId} className="trending-card">
+                                            {movie.poster ? (
+                                                <img src={movie.poster} alt={movie.title} />
+                                            ) : (
+                                                <div className="trending-poster-empty">🎬</div>
+                                            )}
+                                            <div className="trending-info">
+                                                <h4>{movie.title}</h4>
+                                                <div className="trending-meta">
+                                                    {movie.year && <span>{movie.year}</span>}
+                                                    {movie.rating && <span>★ {movie.rating.toFixed(1)}</span>}
+                                                </div>
+                                            </div>
+                                            {movie.trailer && (
+                                                <a href={movie.trailer} target="_blank" rel="noopener noreferrer" className="trending-trailer">
+                                                    ▶
+                                                </a>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                {trendingPage < trendingTotalPages && (
+                                    <button
+                                        className="load-more-button"
+                                        onClick={() => fetchTrending(trendingPage + 1)}
+                                    >
+                                        Load More
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
 

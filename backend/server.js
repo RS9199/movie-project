@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const tmdbRoutes = require('./routes/tmdbRoutes');
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(passport.initialize());
 
 app.use('/api', movieRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/tmdb', tmdbRoutes);
 
 app.use(errorHandler);
 

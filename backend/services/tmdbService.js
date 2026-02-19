@@ -69,4 +69,39 @@ const enrichMovies = async (movies) => {
     return enrichedMovies;
 };
 
-module.exports = { searchMovie, enrichMovies };
+
+const getTrending = async (page = 1) => {
+    try {
+        const response = await fetch(
+            `${TMDB_BASE_URL}/trending/movie/week?api_key=${process.env.TMDB_API_KEY}&page=${page}`
+        );
+        const data = await response.json();
+
+        const movies = await Promise.all(
+            data.results.map(async (movie) => {
+                const trailerUrl = await getTrailer(movie.id);
+                return {
+                    tmdbId: movie.id,
+                    title: movie.title,
+                    overview: movie.overview,
+                    poster: movie.poster_path ? `${TMDB_IMAGE_URL}/w500${movie.poster_path}` : null,
+                    backdrop: movie.backdrop_path ? `${TMDB_IMAGE_URL}/w1280${movie.backdrop_path}` : null,
+                    rating: movie.vote_average,
+                    releaseDate: movie.release_date,
+                    year: movie.release_date ? movie.release_date.split('-')[0] : null,
+                    trailer: trailerUrl
+                };
+            })
+        );
+
+        return {
+            movies,
+            page: data.page,
+            totalPages: data.total_pages
+        };
+    } catch (error) {
+        console.error('TMDB trending error:', error);
+        return { movies: [], page: 1, totalPages: 1 };
+    }
+};
+module.exports = { searchMovie, enrichMovies, getTrending };

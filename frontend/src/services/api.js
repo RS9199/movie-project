@@ -198,3 +198,20 @@ export const resetPassword = async (token, password) => {
 
     return data;
 };
+
+export const getTrending = async (page = 1) => {
+    try {
+        const response = await fetch(
+            API_URL + '/tmdb/trending?page=' + page
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch trending movies');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
