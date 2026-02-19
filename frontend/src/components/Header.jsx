@@ -1,6 +1,4 @@
-import React from 'react';
-
-function Header({ onClearHistory }) {
+function Header({ onClearHistory, user, onLogout, onLoginClick }) {
     return (
         <header className="header">
             <div className="header-content">
@@ -8,9 +6,23 @@ function Header({ onClearHistory }) {
                     <span className="header-icon">🎬</span>
                     <h1>MovieMind AI</h1>
                 </div>
-                <button className="clear-button" onClick={onClearHistory}>
-                    New Conversation
-                </button>
+                <div className="header-actions">
+                    {user && (
+                        <span className="header-user">Hello, {user.name}</span>
+                    )}
+                    <button className="clear-button" onClick={onClearHistory}>
+                        New Conversation
+                    </button>
+                    {user ? (
+                        <button className="logout-button" onClick={onLogout}>
+                            Logout
+                        </button>
+                    ) : (
+                        <button className="login-button" onClick={onLoginClick}>
+                            Sign In
+                        </button>
+                    )}
+                </div>
             </div>
         </header>
     );
