@@ -8,12 +8,14 @@ const connectDB = require('./config/database');
 const movieRoutes = require('./routes/movieRoutes');
 const authRoutes = require('./routes/authRoutes');
 const errorHandler = require('./middleware/errorHandler');
+const passport = require('./config/passport');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+app.use(passport.initialize());
 
 app.use('/api', movieRoutes);
 app.use('/api/auth', authRoutes);

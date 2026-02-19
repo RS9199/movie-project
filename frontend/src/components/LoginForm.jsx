@@ -70,7 +70,16 @@ function LoginForm({ onLogin, onSwitchToRegister, onClose }) {
                         {isLoading ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
+                <div className="auth-divider">
+                    <span>or</span>
+                </div>
 
+                <button
+                    className="google-button"
+                    onClick={() => window.location.href = 'http://localhost:3001/api/auth/google'}
+                >
+                    Sign in with Google
+                </button>
                 <p className="auth-switch">
                     Don't have an account?{' '}
                     <button

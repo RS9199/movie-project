@@ -114,3 +114,15 @@ exports.getMe = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.googleCallback = (req, res) => {
+    const token = generateToken(req.user._id);
+
+    res.redirect(
+        'http://localhost:3000?token=' + token +
+        '&name=' + encodeURIComponent(req.user.name) +
+        '&email=' + encodeURIComponent(req.user.email) +
+        '&id=' + req.user._id +
+        '&role=' + req.user.role
+    );
+};

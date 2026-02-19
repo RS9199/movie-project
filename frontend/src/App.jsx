@@ -25,8 +25,28 @@ function App() {
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
     useEffect(() => {
+        handleGoogleCallback();
         checkAuth();
     }, []);
+
+    const handleGoogleCallback = () => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+
+        if (token) {
+            localStorage.setItem('token', token);
+
+            const userData = {
+                id: params.get('id'),
+                name: params.get('name'),
+                email: params.get('email'),
+                role: params.get('role')
+            };
+
+            setUser(userData);
+            window.history.replaceState({}, '', '/');
+        }
+    };
 
     const checkAuth = async () => {
         try {

@@ -111,7 +111,16 @@ function RegisterForm({ onRegister, onSwitchToLogin, onClose }) {
                         {isLoading ? 'Creating account...' : 'Create Account'}
                     </button>
                 </form>
+                <div className="auth-divider">
+                    <span>or</span>
+                </div>
 
+                <button
+                    className="google-button"
+                    onClick={() => window.location.href = 'http://localhost:3001/api/auth/google'}
+                >
+                    Sign up with Google
+                </button>
                 <p className="auth-switch">
                     Already have an account?{' '}
                     <button
