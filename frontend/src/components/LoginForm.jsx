@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function LoginForm({ onLogin, onSwitchToRegister, onClose }) {
+function LoginForm({ onLogin, onSwitchToRegister, onClose, onForgotPassword }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
@@ -70,6 +70,11 @@ function LoginForm({ onLogin, onSwitchToRegister, onClose }) {
                         {isLoading ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
+                <p className="auth-switch" style={{ marginTop: '1rem' }}>
+                    <button className="auth-switch-button" onClick={onForgotPassword}>
+                        Forgot your password?
+                    </button>
+                </p>
                 <div className="auth-divider">
                     <span>or</span>
                 </div>

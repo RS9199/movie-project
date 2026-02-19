@@ -5,6 +5,8 @@ import MovieList from './components/MovieList';
 import LoadingSpinner from './components/LoadingSpinner';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
+import ForgotPasswordForm from './components/ForgotPasswordForm';
+import ResetPasswordForm from './components/ResetPasswordForm';
 import {
     getRecommendations,
     clearHistory,
@@ -23,15 +25,18 @@ function App() {
     const [showAuth, setShowAuth] = useState(false);
     const [authPage, setAuthPage] = useState('login');
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+    const [resetToken, setResetToken] = useState(null);
 
     useEffect(() => {
-        handleGoogleCallback();
+        handleUrlParams();
         checkAuth();
     }, []);
 
-    const handleGoogleCallback = () => {
+    const handleUrlParams = () => {
         const params = new URLSearchParams(window.location.search);
         const token = params.get('token');
+        const verified = params.get('verified');
+        const path = window.location.pathname;
 
         if (token) {
             localStorage.setItem('token', token);
@@ -44,8 +49,20 @@ function App() {
             };
 
             setUser(userData);
-            window.history.replaceState({}, '', '/');
         }
+
+        if (verified === 'true') {
+            alert('Email verified successfully! You can now enjoy all features.');
+        } else if (verified === 'error') {
+            alert('Verification link is invalid or expired.');
+        }
+
+        if (path.startsWith('/reset-password/')) {
+            const resetToken = path.split('/reset-password/')[1];
+            setResetToken(resetToken);
+        }
+
+        window.history.replaceState({}, '', '/');
     };
 
     const checkAuth = async () => {
@@ -113,6 +130,22 @@ function App() {
         );
     }
 
+    if (resetToken) {
+        return (
+            <div className="app">
+                <ResetPasswordForm
+                    token={resetToken}
+                    onSuccess={() => {
+                        setResetToken(null);
+                        setShowAuth(true);
+                        setAuthPage('login');
+                        alert('Password reset successful! You can now sign in.');
+                    }}
+                />
+            </div>
+        );
+    }
+
     if (showAuth) {
         return (
             <div className="app">
@@ -120,13 +153,18 @@ function App() {
                     <LoginForm
                         onLogin={handleLogin}
                         onSwitchToRegister={() => setAuthPage('register')}
+                        onForgotPassword={() => setAuthPage('forgot')}
                         onClose={() => setShowAuth(false)}
                     />
-                ) : (
+                ) : authPage === 'register' ? (
                     <RegisterForm
                         onRegister={handleRegister}
                         onSwitchToLogin={() => setAuthPage('login')}
                         onClose={() => setShowAuth(false)}
+                    />
+                ) : (
+                    <ForgotPasswordForm
+                        onBack={() => setAuthPage('login')}
                     />
                 )}
             </div>
@@ -144,7 +182,7 @@ function App() {
             <main className="main-content">
                 {movies.length === 0 && !isLoading && !error && (
                     <div className="welcome-message">
-                        <h2>{user ? 'Welcome, ' + user.name + '!' : 'Welcome to MovieMind AI'}</h2>
+                        <h2>{user ? 'Welcome, ' + user.name + '!' : 'Welcome to MovisionAI'}</h2>
                         <p>Tell me what kind of movies you enjoy, and I will recommend
                             some great picks for you!</p>
                         <p className="welcome-hint">Try something like: "I love sci-fi movies

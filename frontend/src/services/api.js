@@ -166,3 +166,35 @@ export const checkHealth = async () => {
         throw error;
     }
 };
+
+export const forgotPassword = async (email) => {
+    const response = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong');
+    }
+
+    return data;
+};
+
+export const resetPassword = async (token, password) => {
+    const response = await fetch(`${API_URL}/auth/reset-password/${token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong');
+    }
+
+    return data;
+};
