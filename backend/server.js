@@ -10,6 +10,7 @@ const movieRoutes = require('./routes/movieRoutes');
 const authRoutes = require('./routes/authRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const passport = require('./config/passport');
+const watchlistRoutes = require('./routes/watchlistRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,6 +22,7 @@ app.use(passport.initialize());
 app.use('/api', movieRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/tmdb', tmdbRoutes);
+app.use('/api/watchlist', watchlistRoutes);
 
 app.use(errorHandler);
 

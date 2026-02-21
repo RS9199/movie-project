@@ -3,13 +3,13 @@ const router = express.Router();
 const passport = require('../config/passport');
 
 const authController = require('../controllers/authController');
-const { authMiddleware } = require('../middleware/authMiddleware');
+const auth = require('../middleware/auth');
 
 router.post('/register', authController.register);
 
 router.post('/login', authController.login);
 
-router.get('/me', authMiddleware, authController.getMe);
+router.get('/me', auth, authController.getMe);
 
 router.get('/verify-email/:token', authController.verifyEmail);
 

@@ -7,6 +7,8 @@ import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
 import ResetPasswordForm from './components/ResetPasswordForm';
+import WatchlistPage from './components/WatchlistPage';
+
 import {
     getRecommendations,
     clearHistory,
@@ -14,7 +16,9 @@ import {
     register,
     logout,
     getMe,
-    getTrending
+    getTrending,
+    addToWatchlist,
+    getWatchlist
 } from './services/api';
 import './App.css';
 
@@ -30,6 +34,8 @@ function App() {
     const [trendingMovies, setTrendingMovies] = useState([]);
     const [trendingPage, setTrendingPage] = useState(1);
     const [trendingTotalPages, setTrendingTotalPages] = useState(1);
+    const [savedMovies, setSavedMovies] = useState([]);
+    const [showWatchlist, setShowWatchlist] = useState(false);
 
 
     useEffect(() => {
@@ -75,6 +81,7 @@ function App() {
         try {
             const data = await getMe();
             setUser(data.user);
+            fetchWatchlist();
         } catch (err) {
             setUser(null);
         } finally {
@@ -94,6 +101,42 @@ function App() {
             setTrendingTotalPages(data.totalPages);
         } catch (err) {
             console.error('Failed to fetch trending:', err);
+        }
+    };
+
+    const fetchWatchlist = async () => {
+        try {
+            const data = await getWatchlist();
+            setSavedMovies(data.map(movie => movie.tmdbId));
+        } catch (err) {
+            console.error('Failed to fetch watchlist:', err);
+        }
+    };
+
+    const handleSaveMovie = async (movie) => {
+        if (!user) {
+            alert('Please sign in to save movies');
+            return;
+        }
+
+        if (savedMovies.includes(movie.tmdbId)) {
+            return;
+        }
+
+        try {
+            await addToWatchlist({
+                tmdbId: movie.tmdbId,
+                title: movie.title,
+                poster: movie.poster,
+                rating: movie.rating,
+                year: movie.year,
+                overview: movie.overview,
+                trailer: movie.trailer,
+                backdrop: movie.backdrop
+            });
+            setSavedMovies(prev => [...prev, movie.tmdbId]);
+        } catch (error) {
+            console.error('Save error:', error);
         }
     };
 
@@ -138,6 +181,10 @@ function App() {
         } catch (err) {
             setError(err.message);
         }
+    };
+
+    const handleMovieRemoved = (tmdbId) => {
+        setSavedMovies(prev => prev.filter(id => id !== tmdbId));
     };
 
     if (isCheckingAuth) {
@@ -199,68 +246,84 @@ function App() {
                 user={user}
                 onLogout={handleLogout}
                 onLoginClick={() => setShowAuth(true)}
+                onWatchlistClick={() => setShowWatchlist(true)}
             />
             <main className="main-content">
-                {movies.length === 0 && !isLoading && !error && (
-                    <div className="welcome-section">
-                        <div className="welcome-message">
-                            <h2>{user ? 'Welcome, ' + user.name + '!' : 'Welcome to MovisionAI'}</h2>
-                            <p>Tell me what kind of movies you enjoy, and I will recommend
-                                some great picks for you!</p>
-                            <p className="welcome-hint">Try something like: "I love sci-fi movies
-                                with mind-bending plots" or "Suggest some feel-good comedies"</p>
-                        </div>
-
-                        {trendingMovies.length > 0 && (
-                            <div className="trending-section">
-                                <h2 className="trending-title">🔥 Trending This Week</h2>
-                                <div className="trending-grid">
-                                    {trendingMovies.map((movie) => (
-                                        <div key={movie.tmdbId} className="trending-card">
-                                            {movie.poster ? (
-                                                <img src={movie.poster} alt={movie.title} />
-                                            ) : (
-                                                <div className="trending-poster-empty">🎬</div>
-                                            )}
-                                            <div className="trending-info">
-                                                <h4>{movie.title}</h4>
-                                                <div className="trending-meta">
-                                                    {movie.year && <span>{movie.year}</span>}
-                                                    {movie.rating && <span>★ {movie.rating.toFixed(1)}</span>}
-                                                </div>
-                                            </div>
-                                            {movie.trailer && (
-                                                <a href={movie.trailer} target="_blank" rel="noopener noreferrer" className="trending-trailer">
-                                                    ▶
-                                                </a>
-                                            )}
-                                        </div>
-                                    ))}
+                {showWatchlist ? (
+                    <WatchlistPage
+                        onClose={() => setShowWatchlist(false)}
+                        onMovieRemoved={handleMovieRemoved}
+                    />
+                ) : (
+                    <>
+                        {movies.length === 0 && !isLoading && !error && (
+                            <div className="welcome-section">
+                                <div className="welcome-message">
+                                    <h2>{user ? 'Welcome, ' + user.name + '!' : 'Welcome to MovisionAI'}</h2>
+                                    <p>Tell me what kind of movies you enjoy, and I will recommend
+                                        some great picks for you!</p>
+                                    <p className="welcome-hint">Try something like: "I love sci-fi movies
+                                        with mind-bending plots" or "Suggest some feel-good comedies"</p>
                                 </div>
-                                {trendingPage < trendingTotalPages && (
-                                    <button
-                                        className="load-more-button"
-                                        onClick={() => fetchTrending(trendingPage + 1)}
-                                    >
-                                        Load More
-                                    </button>
+
+                                {trendingMovies.length > 0 && (
+                                    <div className="trending-section">
+                                        <h2 className="trending-title">🔥 Trending This Week</h2>
+                                        <div className="trending-grid">
+                                            {trendingMovies.map((movie) => (
+                                                <div key={movie.tmdbId} className="trending-card">
+                                                    {movie.poster ? (
+                                                        <img src={movie.poster} alt={movie.title} />
+                                                    ) : (
+                                                        <div className="trending-poster-empty">🎬</div>
+                                                    )}
+                                                    <div className="trending-info">
+                                                        <h4>{movie.title}</h4>
+                                                        <div className="trending-meta">
+                                                            {movie.year && <span>{movie.year}</span>}
+                                                            {movie.rating && <span>★ {movie.rating.toFixed(1)}</span>}
+                                                        </div>
+                                                    </div>
+                                                    {movie.trailer && (
+                                                        <a href={movie.trailer} target="_blank" rel="noopener noreferrer" className="trending-trailer">
+                                                            ▶
+                                                        </a>
+                                                    )}
+                                                    <button
+                                                        className={'trending-save' + (savedMovies.includes(movie.tmdbId) ? ' saved' : '')}
+                                                        onClick={() => handleSaveMovie(movie)}
+                                                    >
+                                                        {savedMovies.includes(movie.tmdbId) ? '✓' : '🔖'}
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {trendingPage < trendingTotalPages && (
+                                            <button
+                                                className="load-more-button"
+                                                onClick={() => fetchTrending(trendingPage + 1)}
+                                            >
+                                                Load More
+                                            </button>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         )}
-                    </div>
+
+                        {error && (
+                            <div className="error-message">
+                                <p>{error}</p>
+                            </div>
+                        )}
+
+                        {isLoading && <LoadingSpinner />}
+
+                        <MovieList movies={movies} user={user} savedMovies={savedMovies} onSave={handleSaveMovie} />
+
+                        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+                    </>
                 )}
-
-                {error && (
-                    <div className="error-message">
-                        <p>{error}</p>
-                    </div>
-                )}
-
-                {isLoading && <LoadingSpinner />}
-
-                <MovieList movies={movies} />
-
-                <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
             </main>
         </div>
     );

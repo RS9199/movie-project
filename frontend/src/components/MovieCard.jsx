@@ -1,4 +1,6 @@
-function MovieCard({ movie }) {
+function MovieCard({ movie, user, savedMovies, onSave }) {
+    const isSaved = savedMovies && savedMovies.includes(movie.tmdbId);
+
     return (
         <div className="movie-card">
             <div className="movie-card-inner">
@@ -39,11 +41,24 @@ function MovieCard({ movie }) {
                             <p className="why-text">{movie.why}</p>
                         </div>
                     )}
-                    {movie.trailer && (
-                        <a href={movie.trailer} target="_blank" rel="noopener noreferrer" className="trailer-button">
-                            ▶ Watch Trailer
-                        </a>
-                    )}
+                    <div className="movie-actions">
+                        {movie.trailer ? (
+                            <a href={movie.trailer} target="_blank" rel="noopener noreferrer" className="trailer-button">
+                                ▶ Watch Trailer
+                            </a>
+                        ) : (
+                            <a href={'https://www.google.com/search?q=' + encodeURIComponent(movie.title + ' movie trailer')} target="_blank" rel="noopener noreferrer" className="trailer-button">
+                                🔍 Look Up
+                            </a>
+                        )}
+                        <button
+                            className={'watchlist-button' + (isSaved ? ' saved' : '')}
+                            onClick={() => onSave(movie)}
+                            disabled={isSaved}
+                        >
+                            {isSaved ? '✓ Saved' : '🔖 Save'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

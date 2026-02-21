@@ -2,7 +2,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const SYSTEM_PROMPT = `You are a movie recommendation expert. Provide movie recommendations in ONLY valid JSON format with NO markdown, preamble, or explanation. Return exactly this structure:
+const SYSTEM_PROMPT = `You are a movie recommendation expert. Only recommend feature films (no TV series, no TV shows, no miniseries, no anime series). Provide movie recommendations in ONLY valid JSON format with NO markdown, preamble, or explanation. Return exactly this structure:
 {
   "recommendations": [
     {

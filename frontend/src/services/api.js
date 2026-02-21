@@ -215,3 +215,81 @@ export const getTrending = async (page = 1) => {
         throw error;
     }
 };
+
+export const addToWatchlist = async (movie) => {
+    try {
+        const response = await fetch(
+            API_URL + '/watchlist',
+            createPostOptions(movie)
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to add to watchlist');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
+export const removeFromWatchlist = async (tmdbId) => {
+    try {
+        const response = await fetch(
+            API_URL + '/watchlist/' + tmdbId,
+            {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + getToken()
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to remove from watchlist');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
+export const getWatchlist = async () => {
+    try {
+        const response = await fetch(
+            API_URL + '/watchlist',
+            createGetOptions()
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch watchlist');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
+export const checkWatchlist = async (tmdbId) => {
+    try {
+        const response = await fetch(
+            API_URL + '/watchlist/check/' + tmdbId,
+            createGetOptions()
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to check watchlist');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};

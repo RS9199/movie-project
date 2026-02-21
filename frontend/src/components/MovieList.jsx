@@ -1,6 +1,6 @@
 import MovieCard from './MovieCard';
 
-function MovieList({ movies }) {
+function MovieList({ movies, user, savedMovies, onSave }) {
     if (!movies || movies.length === 0) {
         return null;
     }
@@ -8,7 +8,7 @@ function MovieList({ movies }) {
     return (
         <div className="movie-list">
             {movies.map((movie, index) => (
-                <MovieCard key={index} movie={movie} />
+                <MovieCard key={index} movie={movie} user={user} savedMovies={savedMovies} onSave={onSave} />
             ))}
         </div>
     );
