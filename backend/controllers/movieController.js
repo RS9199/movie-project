@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
-const geminiService = require('../services/geminiService');
+//const geminiService = require('../services/geminiService');
+const aiService = require('../services/aiService');
 const sessionManager = require('../utils/sessionManager');
 const { enrichMovies } = require('../services/tmdbService');
 
@@ -8,7 +9,7 @@ exports.getRecommendations = async (req, res, next) => {
         const message = req.cleanMessage || req.body.message;
         const sessionId = req.body.sessionId || uuidv4();
         const history = sessionManager.getSession(sessionId) || [];
-        const result = await geminiService.getMovieRecommendations(message, history);
+        const result = await aiService.getMovieRecommendations(message, history);
         sessionManager.updateSession(sessionId, result.conversationHistory);
 
         const enrichedMovies = await enrichMovies(result.recommendations);
