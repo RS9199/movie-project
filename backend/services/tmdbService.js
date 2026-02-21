@@ -1,33 +1,9 @@
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_URL = 'https://image.tmdb.org/t/p';
 
+const { getGenres } = require('../utils/genreMap');
 
-const GENRE_MAP = {
-    28: 'Action',
-    12: 'Adventure',
-    16: 'Animation',
-    35: 'Comedy',
-    80: 'Crime',
-    99: 'Documentary',
-    18: 'Drama',
-    10751: 'Family',
-    14: 'Fantasy',
-    36: 'History',
-    27: 'Horror',
-    10402: 'Music',
-    9648: 'Mystery',
-    10749: 'Romance',
-    878: 'Sci-Fi',
-    10770: 'TV Movie',
-    53: 'Thriller',
-    10752: 'War',
-    37: 'Western'
-};
 
-const getGenres = (genreIds) => {
-    if (!genreIds || genreIds.length === 0) return null;
-    return genreIds.map(id => GENRE_MAP[id]).filter(Boolean).join(', ');
-};
 
 const getTrailer = async (movieId) => {
     try {
@@ -134,4 +110,35 @@ const getTrending = async (page = 1) => {
         return { movies: [], page: 1, totalPages: 1 };
     }
 };
-module.exports = { searchMovie, enrichMovies, getTrending };
+
+const searchMovies = async (query, page = 1) => {
+    try {
+        const response = await fetch(
+            `${TMDB_BASE_URL}/search/movie?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=${page}`
+        );
+        const data = await response.json();
+
+        const movies = data.results.map(movie => ({
+            tmdbId: movie.id,
+            title: movie.title,
+            overview: movie.overview,
+            poster: movie.poster_path ? `${TMDB_IMAGE_URL}/w500${movie.poster_path}` : null,
+            backdrop: movie.backdrop_path ? `${TMDB_IMAGE_URL}/w1280${movie.backdrop_path}` : null,
+            rating: movie.vote_average,
+            releaseDate: movie.release_date,
+            year: movie.release_date ? movie.release_date.split('-')[0] : null,
+            genre: getGenres(movie.genre_ids)
+        }));
+
+        return {
+            movies,
+            page: data.page,
+            totalPages: data.total_pages,
+            totalResults: data.total_results
+        };
+    } catch (error) {
+        console.error('TMDB search error:', error);
+        return { movies: [], page: 1, totalPages: 1, totalResults: 0 };
+    }
+};
+module.exports = { searchMovie, enrichMovies, getTrending, searchMovies };

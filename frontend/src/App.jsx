@@ -9,6 +9,7 @@ import ForgotPasswordForm from './components/ForgotPasswordForm';
 import ResetPasswordForm from './components/ResetPasswordForm';
 import WatchlistPage from './components/WatchlistPage';
 import WatchedPage from './components/WatchedPage';
+import SearchPage from './components/SearchPage';
 
 import {
     getRecommendations,
@@ -41,6 +42,7 @@ function App() {
     const [showWatchlist, setShowWatchlist] = useState(false);
     const [watchedMovies, setWatchedMovies] = useState([]);
     const [showWatched, setShowWatched] = useState(false);
+    const [showSearch, setShowSearch] = useState(false);
 
 
     useEffect(() => {
@@ -299,6 +301,7 @@ function App() {
                 onLoginClick={() => setShowAuth(true)}
                 onWatchlistClick={() => setShowWatchlist(true)}
                 onWatchedClick={() => setShowWatched(true)}
+                onSearchClick={() => setShowSearch(true)}
 
             />
             <main className="main-content">
@@ -311,6 +314,15 @@ function App() {
                     <WatchedPage
                         onClose={() => setShowWatched(false)}
                         onMovieRemoved={handleWatchedRemoved}
+                    />
+                ) : showSearch ? (
+                    <SearchPage
+                        onClose={() => setShowSearch(false)}
+                        user={user}
+                        savedMovies={savedMovies}
+                        onSave={handleSaveMovie}
+                        watchedMovies={watchedMovies}
+                        onWatched={handleWatchedMovie}
                     />
                 ) : (
                     <>

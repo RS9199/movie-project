@@ -354,3 +354,20 @@ export const getStats = async () => {
         throw error;
     }
 };
+
+export const searchTMDB = async (query, page = 1) => {
+    try {
+        const response = await fetch(
+            API_URL + '/tmdb/search?q=' + encodeURIComponent(query) + '&page=' + page
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to search movies');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
