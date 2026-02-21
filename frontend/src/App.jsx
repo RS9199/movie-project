@@ -8,6 +8,7 @@ import RegisterForm from './components/RegisterForm';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
 import ResetPasswordForm from './components/ResetPasswordForm';
 import WatchlistPage from './components/WatchlistPage';
+import WatchedPage from './components/WatchedPage';
 
 import {
     getRecommendations,
@@ -18,7 +19,9 @@ import {
     getMe,
     getTrending,
     addToWatchlist,
-    getWatchlist
+    getWatchlist,
+    addToWatched,
+    getWatched
 } from './services/api';
 import './App.css';
 
@@ -36,6 +39,8 @@ function App() {
     const [trendingTotalPages, setTrendingTotalPages] = useState(1);
     const [savedMovies, setSavedMovies] = useState([]);
     const [showWatchlist, setShowWatchlist] = useState(false);
+    const [watchedMovies, setWatchedMovies] = useState([]);
+    const [showWatched, setShowWatched] = useState(false);
 
 
     useEffect(() => {
@@ -82,6 +87,7 @@ function App() {
             const data = await getMe();
             setUser(data.user);
             fetchWatchlist();
+            fetchWatched();
         } catch (err) {
             setUser(null);
         } finally {
@@ -140,6 +146,38 @@ function App() {
         }
     };
 
+    const handleWatchedMovie = async (movie) => {
+        if (!user) {
+            alert('Please sign in to mark movies as watched');
+            return;
+        }
+
+        if (!movie.tmdbId) {
+            return;
+        }
+
+        if (watchedMovies.includes(movie.tmdbId)) {
+            return;
+        }
+
+        try {
+            await addToWatched({
+                tmdbId: movie.tmdbId,
+                title: movie.title,
+                poster: movie.poster,
+                rating: movie.rating,
+                year: movie.year,
+                overview: movie.overview,
+                trailer: movie.trailer,
+                backdrop: movie.backdrop,
+                genre: movie.genre
+            });
+            setWatchedMovies(prev => [...prev, movie.tmdbId]);
+        } catch (error) {
+            console.error('Watched error:', error);
+        }
+    };
+
     const handleLogin = async (email, password) => {
         const data = await login(email, password);
         setUser(data.user);
@@ -173,6 +211,15 @@ function App() {
         }
     };
 
+    const fetchWatched = async () => {
+        try {
+            const data = await getWatched();
+            setWatchedMovies(data.map(movie => movie.tmdbId));
+        } catch (err) {
+            console.error('Failed to fetch watched:', err);
+        }
+    };
+
     const handleClearHistory = async () => {
         try {
             await clearHistory();
@@ -185,6 +232,10 @@ function App() {
 
     const handleMovieRemoved = (tmdbId) => {
         setSavedMovies(prev => prev.filter(id => id !== tmdbId));
+    };
+
+    const handleWatchedRemoved = (tmdbId) => {
+        setWatchedMovies(prev => prev.filter(id => id !== tmdbId));
     };
 
     if (isCheckingAuth) {
@@ -247,12 +298,19 @@ function App() {
                 onLogout={handleLogout}
                 onLoginClick={() => setShowAuth(true)}
                 onWatchlistClick={() => setShowWatchlist(true)}
+                onWatchedClick={() => setShowWatched(true)}
+
             />
             <main className="main-content">
                 {showWatchlist ? (
                     <WatchlistPage
                         onClose={() => setShowWatchlist(false)}
                         onMovieRemoved={handleMovieRemoved}
+                    />
+                ) : showWatched ? (
+                    <WatchedPage
+                        onClose={() => setShowWatched(false)}
+                        onMovieRemoved={handleWatchedRemoved}
                     />
                 ) : (
                     <>
@@ -295,6 +353,12 @@ function App() {
                                                     >
                                                         {savedMovies.includes(movie.tmdbId) ? '✓' : '🔖'}
                                                     </button>
+                                                    <button
+                                                        className={'trending-watched' + (watchedMovies.includes(movie.tmdbId) ? ' watched' : '')}
+                                                        onClick={() => handleWatchedMovie(movie)}
+                                                    >
+                                                        {watchedMovies.includes(movie.tmdbId) ? '✓' : '👁'}
+                                                    </button>
                                                 </div>
                                             ))}
                                         </div>
@@ -319,7 +383,7 @@ function App() {
 
                         {isLoading && <LoadingSpinner />}
 
-                        <MovieList movies={movies} user={user} savedMovies={savedMovies} onSave={handleSaveMovie} />
+                        <MovieList movies={movies} user={user} savedMovies={savedMovies} onSave={handleSaveMovie} watchedMovies={watchedMovies} onWatched={handleWatchedMovie} />
 
                         <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
                     </>

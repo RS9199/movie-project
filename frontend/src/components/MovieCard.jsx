@@ -1,5 +1,6 @@
-function MovieCard({ movie, user, savedMovies, onSave }) {
+function MovieCard({ movie, user, savedMovies, onSave, watchedMovies, onWatched }) {
     const isSaved = savedMovies && savedMovies.includes(movie.tmdbId);
+    const isWatched = watchedMovies && watchedMovies.includes(movie.tmdbId);
 
     return (
         <div className="movie-card">
@@ -54,9 +55,16 @@ function MovieCard({ movie, user, savedMovies, onSave }) {
                         <button
                             className={'watchlist-button' + (isSaved ? ' saved' : '')}
                             onClick={() => onSave(movie)}
-                            disabled={isSaved}
+                            disabled={isSaved || !movie.tmdbId}
                         >
-                            {isSaved ? '✓ Saved' : '🔖 Save'}
+                            {isSaved ? '✓ Saved' : !movie.tmdbId ? '🔖 N/A' : '🔖 Save'}
+                        </button>
+                        <button
+                            className={'watched-button' + (isWatched ? ' watched' : '')}
+                            onClick={() => onWatched(movie)}
+                            disabled={isWatched || !movie.tmdbId}
+                        >
+                            {isWatched ? '✓ Watched' : !movie.tmdbId ? '👁 N/A' : '👁 Watched'}
                         </button>
                     </div>
                 </div>

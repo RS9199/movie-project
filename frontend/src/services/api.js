@@ -276,15 +276,76 @@ export const getWatchlist = async () => {
     }
 };
 
-export const checkWatchlist = async (tmdbId) => {
+
+export const addToWatched = async (movie) => {
     try {
         const response = await fetch(
-            API_URL + '/watchlist/check/' + tmdbId,
+            API_URL + '/watched',
+            createPostOptions(movie)
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to add to watched');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
+export const removeFromWatched = async (tmdbId) => {
+    try {
+        const response = await fetch(
+            API_URL + '/watched/' + tmdbId,
+            {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + getToken()
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to remove from watched');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
+export const getWatched = async () => {
+    try {
+        const response = await fetch(
+            API_URL + '/watched',
             createGetOptions()
         );
 
         if (!response.ok) {
-            throw new Error('Failed to check watchlist');
+            throw new Error('Failed to fetch watched movies');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
+export const getStats = async () => {
+    try {
+        const response = await fetch(
+            API_URL + '/watched/stats',
+            createGetOptions()
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch stats');
         }
 
         return await response.json();

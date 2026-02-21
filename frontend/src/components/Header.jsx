@@ -1,4 +1,4 @@
-function Header({ onClearHistory, user, onLogout, onLoginClick, onWatchlistClick }) {
+function Header({ onClearHistory, user, onLogout, onLoginClick, onWatchlistClick, onWatchedClick }) {
     return (
         <header className="header">
             <div className="header-content">
@@ -13,6 +13,11 @@ function Header({ onClearHistory, user, onLogout, onLoginClick, onWatchlistClick
                     {user && (
                         <button className="watchlist-nav-button" onClick={onWatchlistClick}>
                             🔖 My Watchlist
+                        </button>
+                    )}
+                    {user && (
+                        <button className="watched-nav-button" onClick={onWatchedClick}>
+                            👁 Watched
                         </button>
                     )}
                     <button className="clear-button" onClick={onClearHistory}>
